@@ -32,11 +32,11 @@ async function main(currentBookedDate) {
         currentBookedDate = date
         const time = await checkAvailableTime(sessionHeaders, date)
 
-        book(sessionHeaders, date, time)
-          .then(d => log(`booked time at ${date} ${time}`))
+        log(`earlier date available at ${date} ${time}`)
+        process.exit(0)
       }
 
-      await sleep(3)
+      await sleep(60)
     }
 
   } catch(err) {
@@ -108,33 +108,6 @@ function handleErrors(response) {
   }
 
   return response
-}
-
-async function book(headers, date, time) {
-  const url = `${BASE_URI}/schedule/${SCHEDULE_ID}/appointment`
-
-  const newHeaders = await fetch(url, { "headers": headers })
-    .then(response => extractHeaders(response))
-
-  return fetch(url, {
-    "method": "POST",
-    "redirect": "follow",
-    "headers": Object.assign({}, newHeaders, {
-      'Content-Type': 'application/x-www-form-urlencoded',
-    }),
-    "body": new URLSearchParams({
-      'utf8': '✓',
-      'authenticity_token': newHeaders['X-CSRF-Token'],
-      'confirmed_limit_message': '1',
-      'use_consulate_appointment_capacity': 'true',
-      'appointments[consulate_appointment][facility_id]': FACILITY_ID,
-      'appointments[consulate_appointment][date]': date,
-      'appointments[consulate_appointment][time]': time,
-      'appointments[asc_appointment][facility_id]': '',
-      'appointments[asc_appointment][date]': '',
-      'appointments[asc_appointment][time]': ''
-    }),
-  })
 }
 
 async function extractHeaders(res) {
